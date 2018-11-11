@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"html/template"
 	"log"
 	"net/http"
 )
@@ -55,7 +56,11 @@ func getAnswer(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(resp)
 		}
 	default:
-		w.Write([]byte(resp.Answer))
+		t, err := template.ParseFiles("template.html")
+		if err != nil {
+			log.Panic(err)
+		}
+		t.Execute(w, resp)
 	}
 }
 
