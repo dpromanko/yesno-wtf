@@ -42,10 +42,26 @@ func getAnswer(w http.ResponseWriter, r *http.Request) {
 	var api yesNoAPI = &resp
 	api.getYesNo()
 
-	w.Write([]byte(resp.Answer))
+	switch r.URL.Path {
+	case "/api":
+		switch r.FormValue("output") {
+		case "prettyjson":
+			var b []byte
+			b, err := json.MarshalIndent(resp, "", " ")
+			if err == nil {
+				_, err = w.Write(b)
+			}
+		default:
+			json.NewEncoder(w).Encode(resp)
+		}
+	default:
+		w.Write([]byte(resp.Answer))
+	}
 }
 
 func main() {
 	http.HandleFunc("/", getAnswer)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+	http.HandleFunc("/api", getAnswer)
+	log.Fatal(http.ListenAndServe(":8080/api", nil))
 }
