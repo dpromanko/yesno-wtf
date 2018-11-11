@@ -6,13 +6,17 @@ import (
 	"net/http"
 )
 
+type yesNoAPI interface {
+	getYesNo()
+}
+
 type yesNoResponse struct {
 	Answer string
 	Forced bool
 	Image  string
 }
 
-func getAnswer(w http.ResponseWriter, r *http.Request) {
+func (r *yesNoResponse) getYesNo() {
 	const url = "http://yesno.wtf/api"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -28,13 +32,17 @@ func getAnswer(w http.ResponseWriter, r *http.Request) {
 
 	defer resp.Body.Close()
 
-	var answer yesNoResponse
-
-	if err := json.NewDecoder(resp.Body).Decode(&answer); err != nil {
+	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
 		log.Panic(err)
 	}
+}
 
-	w.Write([]byte(answer.Answer))
+func getAnswer(w http.ResponseWriter, r *http.Request) {
+	resp := yesNoResponse{}
+	var api yesNoAPI = &resp
+	api.getYesNo()
+
+	w.Write([]byte(resp.Answer))
 }
 
 func main() {
