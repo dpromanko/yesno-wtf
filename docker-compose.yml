@@ -1,0 +1,8 @@
+version: '3.7'
+services:
+  yesno-wtf-proxy:
+    image: dpromanko/yesno-wtf
+    container_name: yesno-wtf
+    build: .
+    ports:
+      - "8080:8080"
